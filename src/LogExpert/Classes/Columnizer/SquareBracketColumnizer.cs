@@ -263,7 +263,7 @@ namespace LogExpert.Classes.Columnizer
             int bracketsExistsCount = 0;
             int maxBracketNumbers = 1;
 
-            foreach (var logline in samples)
+            foreach (ILogLine logline in samples)
             {
                 string line = logline?.FullLine;
                 if (string.IsNullOrEmpty(line))

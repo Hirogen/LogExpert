@@ -6,6 +6,8 @@ using System.Collections.Generic;
  * 
  */
 
+//TODO needs to be replaced
+
 namespace LogExpert.Classes
 {
     /// <summary>
@@ -15,15 +17,11 @@ namespace LogExpert.Classes
     {
         #region cTor
 
-        public CmdLineException(string parameter, string message)
-            :
-            base(string.Format("Syntax error of parameter -{0}: {1}", parameter, message))
+        public CmdLineException(string parameter, string message) : base($"Syntax error of parameter -{parameter}: {message}")
         {
         }
 
-        public CmdLineException(string message)
-            :
-            base(message)
+        public CmdLineException(string message) : base(message)
         {
         }
 
@@ -202,8 +200,7 @@ namespace LogExpert.Classes
     {
         #region cTor
 
-        public CmdLineString(string name, bool required, string helpMessage)
-            : base(name, required, helpMessage)
+        public CmdLineString(string name, bool required, string helpMessage) : base(name, required, helpMessage)
         {
         }
 

@@ -42,7 +42,7 @@ namespace JsonColumnizer
                 result = Priority.WellSupport;
             }
 
-            if (samples != null && samples.Count() > 0)
+            if (samples != null && samples.Any())
             {
                 try
                 {
@@ -51,7 +51,7 @@ namespace JsonColumnizer
                     if (json != null)
                     {
                         var columns = SplitJsonLine(samples.First(), json);
-                        if (columns.ColumnValues.Count() > 0 && Array.Exists(columns.ColumnValues, x => !string.IsNullOrEmpty(x.FullValue)))
+                        if (columns.ColumnValues.Any() && Array.Exists(columns.ColumnValues, x => string.IsNullOrEmpty(x.FullValue) == false))
                         {
                             result = Priority.PerfectlySupport;
                         }

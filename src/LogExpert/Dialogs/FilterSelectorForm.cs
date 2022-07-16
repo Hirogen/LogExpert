@@ -53,7 +53,7 @@ namespace LogExpert.Dialogs
 
         public ILogLineColumnizer SelectedColumnizer { get; private set; }
 
-        public bool ApplyToAll => applyToAllCheckBox.Checked;
+        public bool ApplyToAll => checkBoxApplyToAll.Checked;
 
         public bool IsConfigPressed { get; private set; }
 

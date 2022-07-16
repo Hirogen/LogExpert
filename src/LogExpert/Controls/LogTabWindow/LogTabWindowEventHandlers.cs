@@ -157,6 +157,7 @@ namespace LogExpert.Controls.LogTabWindow
                 return;
             }
 
+            //if multiple open files with different csv columnizers, we can't just take the first, we need to specifiy specific columnizer for every open tab
             CurrentLogWindow.ColumnizerCallbackObject.LineNum = CurrentLogWindow.GetCurrentLineNum();
             FilterSelectorForm form = new FilterSelectorForm(PluginRegistry.GetInstance().RegisteredColumnizers, CurrentLogWindow.CurrentColumnizer, CurrentLogWindow.ColumnizerCallbackObject);
             form.Owner = this;

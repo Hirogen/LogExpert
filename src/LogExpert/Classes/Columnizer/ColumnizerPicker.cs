@@ -63,9 +63,7 @@ namespace LogExpert.Classes.Columnizer
         /// <param name="logFileReader"></param>
         /// <param name="logLineColumnizer"></param>
         /// <returns></returns>
-        public static ILogLineColumnizer FindReplacementForAutoColumnizer(string fileName,
-            IAutoLogLineColumnizerCallback logFileReader,
-            ILogLineColumnizer logLineColumnizer)
+        public static ILogLineColumnizer FindReplacementForAutoColumnizer(string fileName, IAutoLogLineColumnizerCallback logFileReader, ILogLineColumnizer logLineColumnizer)
         {
             if (logLineColumnizer == null || logLineColumnizer.GetName() == "Auto Columnizer")
             {
@@ -124,9 +122,10 @@ namespace LogExpert.Classes.Columnizer
 
             List<Tuple<Priority, ILogLineColumnizer>> priorityListOfColumnizers = new List<Tuple<Priority, ILogLineColumnizer>>();
 
+            Priority priority = default;
+
             foreach (ILogLineColumnizer logLineColumnizer in registeredColumnizer)
             {
-                Priority priority = default(Priority);
                 if (logLineColumnizer is IColumnizerPriority columnizerPriority)
                 {
                     priority = columnizerPriority.GetPriority(fileName, loglines);

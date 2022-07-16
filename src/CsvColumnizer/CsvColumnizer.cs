@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using LogExpert;
 using LumenWorks.Framework.IO.Csv;
 using System.IO;
@@ -131,8 +130,7 @@ namespace CsvColumnizer
 
         public string GetDescription()
         {
-            return
-                "Splits CSV files into columns.\r\n\r\nCredits:\r\nThis Columnizer uses the CsvReader class written by Sébastien Lorion. Downloaded from codeproject.com.\r\n";
+            return "Splits CSV files into columns.\r\n\r\nCredits:\r\nThis Columnizer uses the CsvReader class written by Sébastien Lorion. Downloaded from codeproject.com.\r\n";
         }
 
         public int GetColumnCount()
@@ -165,14 +163,12 @@ namespace CsvColumnizer
             {
                 return SplitCsvLine(line);
             }
-            else
-            {
-                ColumnizedLogLine cLogLine = new ColumnizedLogLine();
-                cLogLine.LogLine = line;
-                cLogLine.ColumnValues = new IColumn[] {new Column {FullValue = line.FullLine, Parent = cLogLine}};
 
-                return cLogLine;
-            }
+            ColumnizedLogLine cLogLine = new ColumnizedLogLine();
+            cLogLine.LogLine = line;
+            cLogLine.ColumnValues = new IColumn[] {new Column {FullValue = line.FullLine, Parent = cLogLine}};
+
+            return cLogLine;
         }
 
         public bool IsTimeshiftImplemented()
@@ -220,8 +216,6 @@ namespace CsvColumnizer
                         csv.ReadNextRecord();
                         int fieldCount = csv.FieldCount;
 
-                        List<Column> columns = new List<Column>();
-
                         for (int i = 0; i < fieldCount; ++i)
                         {
                             if (config.hasFieldNames)
@@ -249,6 +243,7 @@ namespace CsvColumnizer
             CsvColumnizerConfigDlg dlg = new CsvColumnizerConfigDlg(config);
             if (dlg.ShowDialog() == DialogResult.OK)
             {
+                //todo replace with json reader
                 BinaryFormatter formatter = new BinaryFormatter();
                 Stream fs = new FileStream(configPath, FileMode.Create, FileAccess.Write);
                 formatter.Serialize(fs, config);
@@ -269,6 +264,8 @@ namespace CsvColumnizer
             else
             {
                 Stream fs = File.OpenRead(configPath);
+
+                //todo replace with json reader
                 BinaryFormatter formatter = new BinaryFormatter();
                 try
                 {
