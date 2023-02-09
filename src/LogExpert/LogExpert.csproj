@@ -103,6 +103,7 @@
     <Compile Include="Controls\LogWindow\LogWindowsPublic.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Dialogs\ActEntry.cs" />
     <Compile Include="Dialogs\AllowOnlyOneInstanceErrorDialog.cs">
       <SubType>Form</SubType>
     </Compile>

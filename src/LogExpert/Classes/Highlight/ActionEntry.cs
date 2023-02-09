@@ -7,8 +7,9 @@ namespace LogExpert.Classes.Highlight
     {
         #region Fields
 
-        public string actionParam;
-        public string pluginName;
+        public string ActionParam { get; set; }
+        
+        public string PluginName { get; set; }
 
         #endregion
 
@@ -17,8 +18,8 @@ namespace LogExpert.Classes.Highlight
         public ActionEntry Copy()
         {
             ActionEntry e = new ActionEntry();
-            e.pluginName = this.pluginName;
-            e.actionParam = this.actionParam;
+            e.PluginName = PluginName;
+            e.ActionParam = ActionParam;
             return e;
         }
 

@@ -46,7 +46,7 @@
       this.actionComboBox.Name = "actionComboBox";
       this.actionComboBox.Size = new System.Drawing.Size(329, 21);
       this.actionComboBox.TabIndex = 0;
-      this.actionComboBox.SelectedIndexChanged += new System.EventHandler(this.actionComboBox_SelectedIndexChanged);
+      this.actionComboBox.SelectedIndexChanged += new System.EventHandler(this.OnActionComboBoxSelectedIndexChanged);
       // 
       // label1
       // 
@@ -82,7 +82,7 @@
       this.okButton.TabIndex = 4;
       this.okButton.Text = "OK";
       this.okButton.UseVisualStyleBackColor = true;
-      this.okButton.Click += new System.EventHandler(this.okButton_Click);
+      this.okButton.Click += new System.EventHandler(this.OnOkButtonClick);
       // 
       // cancelButton
       // 

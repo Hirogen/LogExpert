@@ -922,6 +922,7 @@ namespace LogExpert.Controls.LogTabWindow
             {
                 toolStripEncodingASCIIItem.Checked = true;
             }
+            
             else if (encoding.Equals(Encoding.Default))
             {
                 toolStripEncodingANSIItem.Checked = true;

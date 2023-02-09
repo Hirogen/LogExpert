@@ -134,7 +134,7 @@ namespace LogExpert.Classes
                                                 plugin.PluginLoaded();
                                             }
 
-                                            _logger.Info("Added columnizer {0}", type.Name);
+                                            _logger.Info($"Added columnizer {type.Name}");
                                         }
                                     }
                                 }
@@ -152,7 +152,6 @@ namespace LogExpert.Classes
 
                                     if (TryAsFileSystem(type))
                                     {
-                                        continue;
                                     }
                                 }
                             }

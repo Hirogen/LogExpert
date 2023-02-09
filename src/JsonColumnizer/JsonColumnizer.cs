@@ -7,24 +7,6 @@ using Newtonsoft.Json.Linq;
 
 namespace JsonColumnizer
 {
-    public class JsonColumn
-    {
-        #region cTor
-
-        public JsonColumn(string name)
-        {
-            Name = name;
-        }
-
-        #endregion
-
-        #region Properties
-
-        public string Name { get; }
-
-        #endregion
-    }
-
     /// <summary>
     ///     This Columnizer can parse JSON files.
     /// </summary>
@@ -32,19 +14,15 @@ namespace JsonColumnizer
     {
         #region Fields
 
-        private static readonly JsonColumn _initialColumn = new JsonColumn("Text");
-
-        private readonly IList<JsonColumn> _columnList = new List<JsonColumn>(new[] {InitialColumn});
-
         #endregion
 
         #region Properties
 
         public HashSet<string> ColumnSet { get; set; } = new HashSet<string>();
 
-        protected IList<JsonColumn> ColumnList => _columnList;
+        protected IList<JsonColumn> ColumnList { get; } = new List<JsonColumn>(new[] {InitialColumn});
 
-        protected static JsonColumn InitialColumn => _initialColumn;
+        protected static JsonColumn InitialColumn { get; } = new JsonColumn("Text");
 
         #endregion
 
@@ -55,22 +33,23 @@ namespace JsonColumnizer
             ColumnList.Clear();
             ColumnSet.Clear();
 
-            var line = callback.GetLogLine(0);
+            ILogLine line = callback.GetLogLine(0);
 
             if (line != null)
             {
-                var json = ParseJson(line);
+                JObject json = ParseJson(line);
                 if (json != null)
                 {
-                    var fieldCount = json.Properties().Count();
+                    int fieldCount = json.Properties().Count();
 
-                    for (var i = 0; i < fieldCount; ++i)
+                    for (int i = 0; i < fieldCount; ++i)
                     {
-                        var columeName = json.Properties().ToArray()[i].Name;
-                        if (!ColumnSet.Contains(columeName))
+                        string columnName = json.Properties().ToArray()[i].Name;
+
+                        if (ColumnSet.Contains(columnName) == false)
                         {
-                            ColumnSet.Add(columeName);
-                            ColumnList.Add(new JsonColumn(columeName));
+                            ColumnSet.Add(columnName);
+                            ColumnList.Add(new JsonColumn(columnName));
                         }
                     }
                 }
@@ -81,7 +60,7 @@ namespace JsonColumnizer
                 }
             }
 
-            if (ColumnList.Count() == 0)
+            if (ColumnList.Any() == false)
             {
                 ColumnSet.Add("Text");
                 ColumnList.Add(InitialColumn);
@@ -112,7 +91,7 @@ namespace JsonColumnizer
         {
             string[] names = new string[GetColumnCount()];
             int i = 0;
-            foreach (var column in ColumnList)
+            foreach (JsonColumn column in ColumnList)
             {
                 names[i++] = column.Name;
             }
@@ -129,9 +108,9 @@ namespace JsonColumnizer
                 return SplitJsonLine(line, json);
             }
 
-            var cLogLine = new ColumnizedLogLine {LogLine = line};
+            ColumnizedLogLine cLogLine = new ColumnizedLogLine {LogLine = line};
 
-            var columns = Column.CreateColumns(ColumnList.Count, cLogLine);
+            Column[] columns = Column.CreateColumns(ColumnList.Count, cLogLine);
 
             columns.Last().FullValue = line.FullLine;
 
@@ -200,11 +179,11 @@ namespace JsonColumnizer
         //
         protected virtual IColumnizedLogLine SplitJsonLine(ILogLine line, JObject json)
         {
-            var cLogLine = new ColumnizedLogLine {LogLine = line};
+            ColumnizedLogLine cLogLine = new ColumnizedLogLine {LogLine = line};
 
-            var columns = json.Properties().Select(property => new ColumnWithName {FullValue = property.Value.ToString(), ColumneName = property.Name.ToString(), Parent = cLogLine}).ToList();
+            List<ColumnWithName> columns = json.Properties().Select(property => new ColumnWithName {FullValue = property.Value.ToString(), ColumneName = property.Name.ToString(), Parent = cLogLine}).ToList();
 
-            foreach (var jsonColumn in columns)
+            foreach (ColumnWithName jsonColumn in columns)
             {
                 // When find new column in a log line, add a new column in the end of the list.
                 if (!ColumnSet.Contains(jsonColumn.ColumneName))
@@ -224,9 +203,9 @@ namespace JsonColumnizer
             // This will make sure the log line displayed correct even the order of json fields changed.
             //
             List<IColumn> returnColumns = new List<IColumn>();
-            foreach (var column in ColumnList)
+            foreach (JsonColumn column in ColumnList)
             {
-                var existingColumn = columns.Find(x => x.ColumneName == column.Name);
+                ColumnWithName existingColumn = columns.Find(x => x.ColumneName == column.Name);
                 if (existingColumn != null)
                 {
                     returnColumns.Add(new Column() {FullValue = existingColumn.FullValue, Parent = cLogLine});

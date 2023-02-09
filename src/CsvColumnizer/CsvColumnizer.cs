@@ -67,13 +67,13 @@ namespace CsvColumnizer
     {
         #region Fields
 
-        private readonly IList<CsvColumn> columnList = new List<CsvColumn>();
-        private CsvColumnizerConfig config;
+        private readonly IList<CsvColumn> _columnList = new List<CsvColumn>();
+        private CsvColumnizerConfig _config;
 
-        private ILogLine firstLine;
+        private ILogLine _firstLine;
 
         // if CSV is detected to be 'invalid' the columnizer will behave like a default columnizer
-        private bool isValidCsv;
+        private bool _isValidCsv;
 
         #endregion
 
@@ -84,39 +84,39 @@ namespace CsvColumnizer
             if (realLineNum == 0)
             {
                 // store for later field names and field count retrieval
-                firstLine = new CsvLogLine
+                _firstLine = new CsvLogLine
                 {
                     FullLine = logLine,
                     LineNumber = 0
                 };
-                if (config.minColumns > 0)
+                if (_config.minColumns > 0)
                 {
                     using (CsvReader csv = new CsvReader(new StringReader(logLine),
                         false,
-                        config.delimiterChar,
-                        config.quoteChar,
-                        config.escapeChar, // is '\0' when not checked in config dlg
-                        config.commentChar,
+                        _config.delimiterChar,
+                        _config.quoteChar,
+                        _config.escapeChar, // is '\0' when not checked in config dlg
+                        _config.commentChar,
                         ValueTrimmingOptions.None))
                     {
-                        if (csv.FieldCount < config.minColumns)
+                        if (csv.FieldCount < _config.minColumns)
                         {
                             // on invalid CSV don't hide the first line from LogExpert, since the file will be displayed in plain mode
-                            isValidCsv = false;
+                            _isValidCsv = false;
                             return logLine;
                         }
                     }
                 }
 
-                isValidCsv = true;
+                _isValidCsv = true;
             }
 
-            if (config.hasFieldNames && realLineNum == 0)
+            if (_config.hasFieldNames && realLineNum == 0)
             {
                 return null; // hide from LogExpert
             }
 
-            if (config.commentChar != ' ' && logLine.StartsWith("" + config.commentChar))
+            if (_config.commentChar != ' ' && logLine.StartsWith("" + _config.commentChar))
             {
                 return null;
             }
@@ -137,16 +137,16 @@ namespace CsvColumnizer
 
         public int GetColumnCount()
         {
-            return isValidCsv ? columnList.Count : 1;
+            return _isValidCsv ? _columnList.Count : 1;
         }
 
         public string[] GetColumnNames()
         {
             string[] names = new string[GetColumnCount()];
-            if (isValidCsv)
+            if (_isValidCsv)
             {
                 int i = 0;
-                foreach (CsvColumn column in columnList)
+                foreach (CsvColumn column in _columnList)
                 {
                     names[i++] = column.Name;
                 }
@@ -161,18 +161,16 @@ namespace CsvColumnizer
 
         public IColumnizedLogLine SplitLine(ILogLineColumnizerCallback callback, ILogLine line)
         {
-            if (isValidCsv)
+            if (_isValidCsv)
             {
                 return SplitCsvLine(line);
             }
-            else
-            {
-                ColumnizedLogLine cLogLine = new ColumnizedLogLine();
-                cLogLine.LogLine = line;
-                cLogLine.ColumnValues = new IColumn[] {new Column {FullValue = line.FullLine, Parent = cLogLine}};
 
-                return cLogLine;
-            }
+            ColumnizedLogLine cLogLine = new ColumnizedLogLine();
+            cLogLine.LogLine = line;
+            cLogLine.ColumnValues = new IColumn[] {new Column {FullValue = line.FullLine, Parent = cLogLine}};
+
+            return cLogLine;
         }
 
         public bool IsTimeshiftImplemented()
@@ -202,19 +200,19 @@ namespace CsvColumnizer
 
         public void Selected(ILogLineColumnizerCallback callback)
         {
-            if (isValidCsv) // see PreProcessLine()
+            if (_isValidCsv) // see PreProcessLine()
             {
-                columnList.Clear();
-                ILogLine line = config.hasFieldNames ? firstLine : callback.GetLogLine(0);
+                _columnList.Clear();
+                ILogLine line = _config.hasFieldNames ? _firstLine : callback.GetLogLine(0);
 
                 if (line != null)
                 {
                     using (CsvReader csv = new CsvReader(new StringReader(line.FullLine),
                         false,
-                        config.delimiterChar,
-                        config.quoteChar,
-                        config.escapeChar, // is '\0' when not checked in config dlg
-                        config.commentChar,
+                        _config.delimiterChar,
+                        _config.quoteChar,
+                        _config.escapeChar, // is '\0' when not checked in config dlg
+                        _config.commentChar,
                         ValueTrimmingOptions.None))
                     {
                         csv.ReadNextRecord();
@@ -224,13 +222,13 @@ namespace CsvColumnizer
 
                         for (int i = 0; i < fieldCount; ++i)
                         {
-                            if (config.hasFieldNames)
+                            if (_config.hasFieldNames)
                             {
-                                columnList.Add(new CsvColumn(csv[i]));
+                                _columnList.Add(new CsvColumn(csv[i]));
                             }
                             else
                             {
-                                columnList.Add(new CsvColumn("Column " + i + 1));
+                                _columnList.Add(new CsvColumn("Column " + i + 1));
                             }
                         }
                     }
@@ -246,12 +244,12 @@ namespace CsvColumnizer
         public void Configure(ILogLineColumnizerCallback callback, string configDir)
         {
             string configPath = configDir + "\\csvcolumnizer.dat";
-            CsvColumnizerConfigDlg dlg = new CsvColumnizerConfigDlg(config);
+            CsvColumnizerConfigDlg dlg = new CsvColumnizerConfigDlg(_config);
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 BinaryFormatter formatter = new BinaryFormatter();
                 Stream fs = new FileStream(configPath, FileMode.Create, FileAccess.Write);
-                formatter.Serialize(fs, config);
+                formatter.Serialize(fs, _config);
                 fs.Close();
                 Selected(callback);
             }
@@ -263,8 +261,8 @@ namespace CsvColumnizer
 
             if (!File.Exists(configPath))
             {
-                config = new CsvColumnizerConfig();
-                config.InitDefaults();
+                _config = new CsvColumnizerConfig();
+                _config.InitDefaults();
             }
             else
             {
@@ -272,13 +270,13 @@ namespace CsvColumnizer
                 BinaryFormatter formatter = new BinaryFormatter();
                 try
                 {
-                    config = (CsvColumnizerConfig) formatter.Deserialize(fs);
+                    _config = (CsvColumnizerConfig) formatter.Deserialize(fs);
                 }
                 catch (SerializationException e)
                 {
                     MessageBox.Show(e.Message, "Deserialize");
-                    config = new CsvColumnizerConfig();
-                    config.InitDefaults();
+                    _config = new CsvColumnizerConfig();
+                    _config.InitDefaults();
                 }
                 finally
                 {
@@ -309,10 +307,10 @@ namespace CsvColumnizer
 
             using (CsvReader csv = new CsvReader(new StringReader(line.FullLine),
                 false,
-                config.delimiterChar,
-                config.quoteChar,
-                config.escapeChar, // is '\0' when not checked in config dlg
-                config.commentChar,
+                _config.delimiterChar,
+                _config.quoteChar,
+                _config.escapeChar, // is '\0' when not checked in config dlg
+                _config.commentChar,
                 ValueTrimmingOptions.None))
             {
                 csv.ReadNextRecord();

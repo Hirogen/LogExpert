@@ -871,8 +871,7 @@ namespace LogExpert.Controls.LogWindow
                     if (plugin != null)
                     {
                         ActionPluginExecuteFx fx = plugin.Execute;
-                        fx.BeginInvoke(entry.SearchText, entry.ActionEntry.actionParam, callback,
-                            CurrentColumnizer, null, null);
+                        fx.BeginInvoke(entry.SearchText, entry.ActionEntry.actionParam, callback, CurrentColumnizer, null, null);
                     }
                 }
             }
