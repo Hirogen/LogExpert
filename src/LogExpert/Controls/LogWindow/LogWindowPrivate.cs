@@ -698,7 +698,7 @@ namespace LogExpert.Controls.LogWindow
                 }
 
                 _statusEventArgs.LineCount = e.LineCount;
-                statusLineFileSize(e.FileSize);
+                StatusLineFileSize(e.FileSize);
 
                 if (!_isLoading)
                 {
@@ -864,14 +864,14 @@ namespace LogExpert.Controls.LogWindow
             callback.LineNum = lineNum;
             foreach (HilightEntry entry in matchingList)
             {
-                if (entry.IsActionEntry && entry.ActionEntry.pluginName != null)
+                if (entry.IsActionEntry && entry.ActionEntry.PluginName != null)
                 {
-                    IKeywordAction plugin =
-                        PluginRegistry.GetInstance().FindKeywordActionPluginByName(entry.ActionEntry.pluginName);
+                    IKeywordAction plugin = PluginRegistry.GetInstance().FindKeywordActionPluginByName(entry.ActionEntry.PluginName);
+
                     if (plugin != null)
                     {
                         ActionPluginExecuteFx fx = plugin.Execute;
-                        fx.BeginInvoke(entry.SearchText, entry.ActionEntry.actionParam, callback, CurrentColumnizer, null, null);
+                        fx.BeginInvoke(entry.SearchText, entry.ActionEntry.ActionParam, callback, CurrentColumnizer, null, null);
                     }
                 }
             }
@@ -910,7 +910,7 @@ namespace LogExpert.Controls.LogWindow
 
         private void SetColumnizerInternal(ILogLineColumnizer columnizer)
         {
-            _logger.Info("SetColumnizerInternal(): {0}", columnizer.GetName());
+            _logger.Info($"SetColumnizerInternal(): {columnizer.GetName()}");
 
             ILogLineColumnizer oldColumnizer = CurrentColumnizer;
             bool oldColumnizerIsXmlType = CurrentColumnizer is ILogLineXmlColumnizer;
@@ -958,11 +958,12 @@ namespace LogExpert.Controls.LogWindow
             {
                 CurrentColumnizer = columnizer;
                 _freezeStateMap.Clear();
+
                 if (_logFileReader != null)
                 {
-                    if (CurrentColumnizer is IPreProcessColumnizer)
+                    if (CurrentColumnizer is IPreProcessColumnizer preProcessorColumnizer)
                     {
-                        _logFileReader.PreProcessColumnizer = (IPreProcessColumnizer)CurrentColumnizer;
+                        _logFileReader.PreProcessColumnizer = preProcessorColumnizer;
                     }
                     else
                     {
@@ -1005,9 +1006,11 @@ namespace LogExpert.Controls.LogWindow
 
             SetColumnizer(columnizer, dataGridView);
             SetColumnizer(columnizer, filterGridView);
+
             _patternWindow?.SetColumnizer(columnizer);
 
             _guiStateArgs.TimeshiftPossible = columnizer.IsTimeshiftImplemented();
+
             SendGuiStateUpdate();
 
             if (_logFileReader != null)
@@ -1078,19 +1081,14 @@ namespace LogExpert.Controls.LogWindow
             }
         }
 
-        private void PaintCell(DataGridViewCellPaintingEventArgs e, DataGridView gridView, bool noBackgroundFill,
-            HilightEntry groundEntry)
+        private void PaintCell(DataGridViewCellPaintingEventArgs e, DataGridView gridView, bool noBackgroundFill, HilightEntry groundEntry)
         {
             PaintHighlightedCell(e, gridView, noBackgroundFill, groundEntry);
         }
 
-        private void PaintHighlightedCell(DataGridViewCellPaintingEventArgs e, DataGridView gridView,
-            bool noBackgroundFill,
-            HilightEntry groundEntry)
+        private void PaintHighlightedCell(DataGridViewCellPaintingEventArgs e, DataGridView gridView, bool noBackgroundFill, HilightEntry groundEntry)
         {
-            IColumn column = e.Value as IColumn;
-
-            if (column == null)
+            if ((e.Value is IColumn column) == false)
             {
                 column = Column.EmptyColumn;
             }
@@ -1105,10 +1103,7 @@ namespace LogExpert.Controls.LogWindow
             HilightMatchEntry hme = new HilightMatchEntry();
             hme.StartPos = 0;
             hme.Length = column.DisplayValue.Length;
-            hme.HilightEntry = new HilightEntry(column.DisplayValue,
-                groundEntry?.ForegroundColor ?? Color.FromKnownColor(KnownColor.Black),
-                groundEntry?.BackgroundColor ?? Color.Empty,
-                false);
+            hme.HilightEntry = new HilightEntry(column.DisplayValue, groundEntry?.ForegroundColor ?? Color.FromKnownColor(KnownColor.Black), groundEntry?.BackgroundColor ?? Color.Empty, false);
 
             if (groundEntry != null)
             {
@@ -1118,8 +1113,7 @@ namespace LogExpert.Controls.LogWindow
             matchList = MergeHighlightMatchEntries(matchList, hme);
 
             int leftPad = e.CellStyle.Padding.Left;
-            RectangleF rect = new RectangleF(e.CellBounds.Left + leftPad, e.CellBounds.Top, e.CellBounds.Width,
-                e.CellBounds.Height);
+            RectangleF rect = new RectangleF(e.CellBounds.Left + leftPad, e.CellBounds.Top, e.CellBounds.Width, e.CellBounds.Height);
             Rectangle borderWidths = PaintHelper.BorderWidths(e.AdvancedBorderStyle);
             Rectangle valBounds = e.CellBounds;
             valBounds.Offset(borderWidths.X, borderWidths.Y);
@@ -1219,10 +1213,10 @@ namespace LogExpert.Controls.LogWindow
                     {
                         entryArray[i] = me.HilightEntry;
                     }
-                    else
-                    {
-                        //entryArray[i].ForegroundColor = me.HilightEntry.ForegroundColor;
-                    }
+                    //else
+                    //{
+                    //    //entryArray[i].ForegroundColor = me.HilightEntry.ForegroundColor;
+                    //}
                 }
             }
 
@@ -1258,8 +1252,8 @@ namespace LogExpert.Controls.LogWindow
         }
 
         /**
-       * Returns the first HilightEntry that matches the given line
-       */
+        * Returns the first HilightEntry that matches the given line
+        */
 
         private HilightEntry FindHilightEntry(ITextValue line)
         {
@@ -1303,9 +1297,8 @@ namespace LogExpert.Controls.LogWindow
         }
 
         /**
-       * Returns all HilightEntry entries which matches the given line
-       */
-
+        * Returns all HilightEntry entries which matches the given line
+        */
         private IList<HilightEntry> FindMatchingHilightEntries(ITextValue line)
         {
             IList<HilightEntry> resultList = new List<HilightEntry>();
@@ -1356,8 +1349,7 @@ namespace LogExpert.Controls.LogWindow
             }
         }
 
-        private void GetHilightActions(IList<HilightEntry> matchingList, out bool noLed, out bool stopTail,
-            out bool setBookmark, out string bookmarkComment)
+        private void GetHilightActions(IList<HilightEntry> matchingList, out bool noLed, out bool stopTail, out bool setBookmark, out string bookmarkComment)
         {
             noLed = stopTail = setBookmark = false;
             bookmarkComment = string.Empty;
@@ -1384,7 +1376,7 @@ namespace LogExpert.Controls.LogWindow
                 }
             }
 
-            bookmarkComment.TrimEnd(new char[] { '\r', '\n' });
+            _ = bookmarkComment.TrimEnd('\r', '\n');
         }
 
         private void StopTimespreadThread()
@@ -1472,9 +1464,7 @@ namespace LogExpert.Controls.LogWindow
                     int row2 = dataGridView.SelectedRows[1].Index;
                     if (row1 > row2)
                     {
-                        int tmp = row1;
-                        row1 = row2;
-                        row2 = tmp;
+                        (row1, row2) = (row2, row1);
                     }
 
                     int refLine = row1;
@@ -1483,6 +1473,7 @@ namespace LogExpert.Controls.LogWindow
                     DateTime timeStamp2 = GetTimestampForLine(ref refLine, false);
                     //TimeSpan span = TimeSpan.FromTicks(timeStamp2.Ticks - timeStamp1.Ticks);
                     DateTime diff;
+
                     if (timeStamp1.Ticks > timeStamp2.Ticks)
                     {
                         diff = new DateTime(timeStamp1.Ticks - timeStamp2.Ticks);
@@ -1536,7 +1527,7 @@ namespace LogExpert.Controls.LogWindow
             }
         }
 
-        private void statusLineFileSize(long size)
+        private void StatusLineFileSize(long size)
         {
             _statusEventArgs.FileSize = size;
             SendStatusLineUpdate();
@@ -1642,7 +1633,7 @@ namespace LogExpert.Controls.LogWindow
                     {
                         if (!Disposing)
                         {
-                            Invoke(progressFx, new object[] { count });
+                            Invoke(progressFx, count);
                         }
                     }
                     catch (ObjectDisposedException ex) // can occur when closing the app while searching
@@ -1837,9 +1828,8 @@ namespace LogExpert.Controls.LogWindow
         }
 
         /**
-       * Shift bookmarks after a logfile rollover
-       */
-
+        * Shift bookmarks after a logfile rollover
+        */
         private void ShiftBookmarks(int offset)
         {
             _bookmarkProvider.ShiftBookmarks(offset);
@@ -2937,9 +2927,9 @@ namespace LogExpert.Controls.LogWindow
 
        /* ========================================================================
         * Timestamp stuff
-        * =======================================================================*/
-
-        private void SetTimestampLimits()
+        * =======================================================================
+        */
+       private void SetTimestampLimits()
         {
             if (!CurrentColumnizer.IsTimeshiftImplemented())
             {
@@ -3423,14 +3413,12 @@ namespace LogExpert.Controls.LogWindow
                 {
                     return;
                 }
-                else
+
+                RowHeightEntry entry = _rowHeightList[rowNum];
+                entry.Height -= _lineHeight;
+                if (entry.Height <= _lineHeight)
                 {
-                    RowHeightEntry entry = _rowHeightList[rowNum];
-                    entry.Height -= _lineHeight;
-                    if (entry.Height <= _lineHeight)
-                    {
-                        _rowHeightList.Remove(rowNum);
-                    }
+                    _rowHeightList.Remove(rowNum);
                 }
             }
             else
@@ -3466,10 +3454,8 @@ namespace LogExpert.Controls.LogWindow
             {
                 return _rowHeightList[rowNum].Height;
             }
-            else
-            {
-                return _lineHeight;
-            }
+
+            return _lineHeight;
         }
 
         private void AddBookmarkAtLineSilently(int lineNum)
@@ -3565,6 +3551,7 @@ namespace LogExpert.Controls.LogWindow
         private void SetDefaultHighlightGroup()
         {
             HilightGroup group = _parentLogTabWin.FindHighlightGroupByFileMask(FileName);
+            
             if (group != null)
             {
                 SetCurrentHighlightGroup(group.GroupName);
