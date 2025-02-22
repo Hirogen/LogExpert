@@ -33,10 +33,16 @@ namespace LogExpert.Dialogs
             Preferences = prefs;
             _logTabWin = logTabWin;
             InitializeComponent();
-
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            ColorMode.ChangeTheme(Controls);
+            ColorMode.UseImmersiveDarkMode(Handle, ColorMode.DarkModeEnabled);
+
+            BackColor = ColorMode.BackgroundColor;
+            ForeColor = ColorMode.ForeColor;
+
         }
 
         public SettingsDialog(Preferences prefs, LogTabWindow logTabWin, int tabToOpen) : this(prefs, logTabWin)
@@ -1029,5 +1035,14 @@ namespace LogExpert.Dialogs
         }
 
         #endregion
+
+        //Draw Tabpages Headers with custom colors from the Colormode, for Darkmode and Lightmode
+        private void OnDrawItem(object sender, DrawItemEventArgs e)
+        {
+            using Brush br = new SolidBrush(ColorMode.TabsBackgroundStripColor);
+            var bounds = tabControlSettings.GetTabRect(e.Index);
+            e.Graphics.FillRectangle(br, bounds);
+            TextRenderer.DrawText(e.Graphics, tabControlSettings.TabPages[e.Index].Text, e.Font, e.Bounds, ColorMode.ForeColor);
+        }
     }
 }

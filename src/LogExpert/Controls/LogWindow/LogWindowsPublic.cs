@@ -399,6 +399,7 @@ namespace LogExpert.Controls.LogWindow
             if (line != null)
             {
                 HilightEntry entry = FindFirstNoWordMatchHilightEntry(line);
+
                 e.Graphics.SetClip(e.CellBounds);
 
                 if ((e.State & DataGridViewElementStates.Selected) == DataGridViewElementStates.Selected)

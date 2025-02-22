@@ -30,16 +30,21 @@ namespace LogExpert.Controls.LogTabWindow
         private readonly Icon _deadIcon;
 
         private readonly Color _defaultTabColor = Color.FromArgb(255, 192, 192, 192);
-        private readonly Brush _dirtyLedBrush;
 
         private readonly int _instanceNumber;
-        private readonly Brush[] _ledBrushes = new Brush[5];
+
         private readonly Icon[,,,] _ledIcons = new Icon[6, 2, 4, 2];
 
         private readonly Rectangle[] _leds = new Rectangle[5];
 
         private readonly IList<LogWindow.LogWindow> _logWindowList = new List<LogWindow.LogWindow>();
-        private readonly Brush _offLedBrush;
+
+        private Brush _offLedBrush;
+        private Brush[] _ledBrushes = new Brush[5];
+        private Brush _dirtyLedBrush;
+        private Brush _syncLedBrush;
+        private Brush[] _tailLedBrush = new Brush[3];
+
         private readonly bool _showInstanceNumbers;
 
         private readonly string[] _startupFileNames;
@@ -47,9 +52,8 @@ namespace LogExpert.Controls.LogTabWindow
         private readonly EventWaitHandle _statusLineEventHandle = new AutoResetEvent(false);
         private readonly EventWaitHandle _statusLineEventWakeupHandle = new ManualResetEvent(false);
         private readonly object _statusLineLock = new();
-        private readonly Brush _syncLedBrush;
+
         private readonly StringFormat _tabStringFormat = new();
-        private readonly Brush[] _tailLedBrush = new Brush[3];
 
         private BookmarkWindow _bookmarkWindow;
 
@@ -103,23 +107,7 @@ namespace LogExpert.Controls.LogTabWindow
                 led.Offset(0, led.Height + 0);
             }
 
-            int grayAlpha = 50;
-
-            _ledBrushes[0] = new SolidBrush(Color.FromArgb(255, 220, 0, 0));
-            _ledBrushes[1] = new SolidBrush(Color.FromArgb(255, 220, 220, 0));
-            _ledBrushes[2] = new SolidBrush(Color.FromArgb(255, 0, 220, 0));
-            _ledBrushes[3] = new SolidBrush(Color.FromArgb(255, 0, 220, 0));
-            _ledBrushes[4] = new SolidBrush(Color.FromArgb(255, 0, 220, 0));
-
-            _offLedBrush = new SolidBrush(Color.FromArgb(grayAlpha, 160, 160, 160));
-
-            _dirtyLedBrush = new SolidBrush(Color.FromArgb(255, 220, 0, 00));
-
-            _tailLedBrush[0] = new SolidBrush(Color.FromArgb(255, 50, 100, 250)); // Follow tail: blue-ish
-            _tailLedBrush[1] = new SolidBrush(Color.FromArgb(grayAlpha, 160, 160, 160)); // Don't follow tail: gray
-            _tailLedBrush[2] = new SolidBrush(Color.FromArgb(255, 220, 220, 0)); // Stop follow tail (trigger): yellow-ish
-
-            _syncLedBrush = new SolidBrush(Color.FromArgb(255, 250, 145, 30));
+            SetLedBrushes();
 
             CreateIcons();
 
@@ -162,6 +150,26 @@ namespace LogExpert.Controls.LogTabWindow
             InitToolWindows();
         }
 
+        private void SetLedBrushes()
+        {
+            int grayAlpha = 50;
+            _ledBrushes[0] = new SolidBrush(Color.FromArgb(255, 220, 0, 0));
+            _ledBrushes[1] = new SolidBrush(Color.FromArgb(255, 220, 220, 0));
+            _ledBrushes[2] = new SolidBrush(Color.FromArgb(255, 0, 220, 0));
+            _ledBrushes[3] = new SolidBrush(Color.FromArgb(255, 0, 220, 0));
+            _ledBrushes[4] = new SolidBrush(Color.FromArgb(255, 0, 220, 0));
+
+            _offLedBrush = new SolidBrush(Color.FromArgb(grayAlpha, 160, 160, 160));
+
+            _dirtyLedBrush = new SolidBrush(Color.FromArgb(255, 220, 0, 00));
+
+            _tailLedBrush[0] = new SolidBrush(Color.FromArgb(255, 50, 100, 250)); // Follow tail: blue-ish
+            _tailLedBrush[1] = new SolidBrush(Color.FromArgb(grayAlpha, 160, 160, 160)); // Don't follow tail: gray
+            _tailLedBrush[2] = new SolidBrush(Color.FromArgb(255, 220, 220, 0)); // Stop follow tail (trigger): yellow-ish
+
+            _syncLedBrush = new SolidBrush(Color.FromArgb(255, 250, 145, 30));
+        }
+
         #endregion
 
         #region ColorTheme
@@ -170,55 +178,15 @@ namespace LogExpert.Controls.LogTabWindow
             ColorMode.LoadColorMode();
             ColorMode.UseImmersiveDarkMode(Handle, ColorMode.DarkModeEnabled);
 
-            #region ApplyColorToAllControls
-            foreach (Control component in container)
+            try
             {
-                if (component.Controls != null && component.Controls.Count > 0)
-                {
-                    ChangeTheme(component.Controls);
-                    component.BackColor = ColorMode.BackgroundColor;
-                    component.ForeColor = ColorMode.ForeColor;
-                }
-                else
-                {
-                    component.BackColor = ColorMode.BackgroundColor;
-                    component.ForeColor = ColorMode.ForeColor;
-                }
-
-                if (component is MenuStrip menu)
-                {
-                    foreach (ToolStripMenuItem item in menu.Items)
-                    {
-                        item.ForeColor = ColorMode.ForeColor;
-                        item.BackColor = ColorMode.BackgroundColor;
-
-                        try
-                        {
-                            for (var x = 0; x < item.DropDownItems.Count; x++)
-                            {
-                                var children = item.DropDownItems[x];
-                                children.ForeColor = ColorMode.ForeColor;
-                                children.BackColor = ColorMode.MenuBackgroundColor;
-
-                                if (children is ToolStripDropDownItem toolstripDropDownItem)
-                                {
-                                    for (var y = 0; y < toolstripDropDownItem.DropDownItems.Count; y++)
-                                    {
-                                        var subChildren = toolstripDropDownItem.DropDownItems[y];
-                                        subChildren.ForeColor = ColorMode.ForeColor;
-                                        subChildren.BackColor = ColorMode.MenuBackgroundColor;
-                                    }
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.Error(ex, "An error occured while applying style dynamically to all Controls under LogTabWindow:");
-                        }
-                    }
-                }
+                ColorMode.ChangeTheme(container);
             }
-            #endregion
+            catch (Exception ex)
+            {
+
+                _logger.Error(ex, "An error occured while applying style dynamically to all Controls under LogTabWindow:");
+            }
 
             // Colors for selected menus
             mainMenuStrip.Renderer = new ExtendedMenuStripRenderer();
@@ -259,6 +227,7 @@ namespace LogExpert.Controls.LogTabWindow
             dockPanel.Skin.DockPaneStripSkin.DocumentGradient.InactiveTabGradient.StartColor = ColorMode.InactiveTabColor;
             dockPanel.Skin.DockPaneStripSkin.DocumentGradient.InactiveTabGradient.EndColor = ColorMode.InactiveTabColor;
             dockPanel.Skin.DockPaneStripSkin.DocumentGradient.InactiveTabGradient.TextColor = ColorMode.ForeColor;
+
             #endregion Tabs
         }
         #endregion

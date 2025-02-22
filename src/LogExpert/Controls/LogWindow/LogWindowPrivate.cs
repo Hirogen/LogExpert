@@ -1109,15 +1109,12 @@ namespace LogExpert.Controls.LogWindow
             }
         }
 
-        private void PaintCell(DataGridViewCellPaintingEventArgs e, DataGridView gridView, bool noBackgroundFill,
-            HilightEntry groundEntry)
+        private void PaintCell(DataGridViewCellPaintingEventArgs e, DataGridView gridView, bool noBackgroundFill, HilightEntry groundEntry)
         {
             PaintHighlightedCell(e, gridView, noBackgroundFill, groundEntry);
         }
 
-        private void PaintHighlightedCell(DataGridViewCellPaintingEventArgs e, DataGridView gridView,
-            bool noBackgroundFill,
-            HilightEntry groundEntry)
+        private void PaintHighlightedCell(DataGridViewCellPaintingEventArgs e, DataGridView gridView, bool noBackgroundFill, HilightEntry groundEntry)
         {
             var column = e.Value as IColumn;
 
@@ -1153,8 +1150,7 @@ namespace LogExpert.Controls.LogWindow
             matchList = MergeHighlightMatchEntries(matchList, hme);
 
             int leftPad = e.CellStyle.Padding.Left;
-            RectangleF rect = new(e.CellBounds.Left + leftPad, e.CellBounds.Top, e.CellBounds.Width,
-                e.CellBounds.Height);
+            RectangleF rect = new(e.CellBounds.Left + leftPad, e.CellBounds.Top, e.CellBounds.Width, e.CellBounds.Height);
             Rectangle borderWidths = PaintHelper.BorderWidths(e.AdvancedBorderStyle);
             Rectangle valBounds = e.CellBounds;
             valBounds.Offset(borderWidths.X, borderWidths.Y);
@@ -1174,8 +1170,7 @@ namespace LogExpert.Controls.LogWindow
                     | TextFormatFlags.PreserveGraphicsClipping
                     | TextFormatFlags.NoPadding
                     | TextFormatFlags.VerticalCenter
-                    | TextFormatFlags.TextBoxControl
-                ;
+                    | TextFormatFlags.TextBoxControl;
 
             //          | TextFormatFlags.VerticalCenter
             //          | TextFormatFlags.TextBoxControl
@@ -1192,15 +1187,18 @@ namespace LogExpert.Controls.LogWindow
             foreach (HilightMatchEntry matchEntry in matchList)
             {
                 Font font = matchEntry != null && matchEntry.HilightEntry.IsBold ? BoldFont : NormalFont;
+
                 Brush bgBrush = matchEntry.HilightEntry.BackgroundColor != Color.Empty
                     ? new SolidBrush(matchEntry.HilightEntry.BackgroundColor)
                     : null;
+
                 string matchWord = column.DisplayValue.Substring(matchEntry.StartPos, matchEntry.Length);
                 Size wordSize = TextRenderer.MeasureText(e.Graphics, matchWord, font, proposedSize, flags);
                 wordSize.Height = e.CellBounds.Height;
                 Rectangle wordRect = new(wordPos, wordSize);
 
                 Color foreColor = matchEntry.HilightEntry.ForegroundColor;
+
                 if ((e.State & DataGridViewElementStates.Selected) != DataGridViewElementStates.Selected)
                 {
                     if (!noBackgroundFill && bgBrush != null && !matchEntry.HilightEntry.NoBackground)
@@ -1214,8 +1212,7 @@ namespace LogExpert.Controls.LogWindow
                     foreColor = ColorMode.ForeColor;
                 }
 
-                TextRenderer.DrawText(e.Graphics, matchWord, font, wordRect,
-                    foreColor, flags);
+                TextRenderer.DrawText(e.Graphics, matchWord, font, wordRect, foreColor, flags);
 
                 wordPos.Offset(wordSize.Width, 0);
                 bgBrush?.Dispose();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace LogExpert.Config
 {
@@ -96,13 +97,69 @@ namespace LogExpert.Config
             }
 
             int useImmersiveDarkMode = enabled ? 1 : 0;
-            return DwmSetWindowAttribute(handle, (int)attribute, ref useImmersiveDarkMode, sizeof(int)) == 0;
+            return DwmSetWindowAttribute(handle, attribute, ref useImmersiveDarkMode, sizeof(int)) == 0;
 
         }
 
         private static bool IsWindows10OrGreater(int build = -1)
         {
             return Environment.OSVersion.Version.Major >= 10 && Environment.OSVersion.Version.Build >= build;
+        }
+
+        public static void ChangeTheme(Control.ControlCollection container)
+        {
+            foreach (Control component in container)
+            {
+                if (component.Controls != null && component.Controls.Count > 0)
+                {
+                    ChangeTheme(component.Controls);
+                    component.BackColor = BackgroundColor;
+                    component.ForeColor = ForeColor;
+                }
+                else
+                {
+                    component.BackColor = BackgroundColor;
+                    component.ForeColor = ForeColor;
+                }
+
+                if (component is MenuStrip menu)
+                {
+                    foreach (ToolStripMenuItem item in menu.Items)
+                    {
+                        item.ForeColor = ForeColor;
+                        item.BackColor = BackgroundColor;
+
+                        for (var x = 0; x < item.DropDownItems.Count; x++)
+                        {
+                            var children = item.DropDownItems[x];
+                            children.ForeColor = ForeColor;
+                            children.BackColor = MenuBackgroundColor;
+
+                            if (children is ToolStripDropDownItem toolstripDropDownItem)
+                            {
+                                for (var y = 0; y < toolstripDropDownItem.DropDownItems.Count; y++)
+                                {
+                                    var subChildren = toolstripDropDownItem.DropDownItems[y];
+                                    subChildren.ForeColor = ForeColor;
+                                    subChildren.BackColor = MenuBackgroundColor;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (component is TabControl tabControl)
+                {
+                    foreach (TabPage tabPage in tabControl.TabPages)
+                    {
+                        tabPage.BackColor = BackgroundColor;
+                        tabPage.ForeColor = ForeColor;
+                    }
+
+                    tabControl.BackColor = TabsBackgroundStripColor;
+                    tabControl.ForeColor = ForeColor;
+                }
+            }
         }
 
         #endregion TitleBarDarkMode

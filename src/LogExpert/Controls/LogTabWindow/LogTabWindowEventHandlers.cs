@@ -30,19 +30,7 @@ namespace LogExpert.Controls.LogTabWindow
         private void OnLogTabWindowLoad(object sender, EventArgs e)
         {
             ApplySettings(ConfigManager.Settings, SettingsFlags.All);
-            if (ConfigManager.Settings.isMaximized)
-            {
-                Bounds = ConfigManager.Settings.appBoundsFullscreen;
-                WindowState = FormWindowState.Maximized;
-                Bounds = ConfigManager.Settings.appBounds;
-            }
-            else
-            {
-                if (ConfigManager.Settings.appBounds.Right > 0)
-                {
-                    Bounds = ConfigManager.Settings.appBounds;
-                }
-            }
+            SetWindowPosition();
 
             if (ConfigManager.Settings.preferences.openLastFiles && _startupFileNames == null)
             {
@@ -56,6 +44,7 @@ namespace LogExpert.Controls.LogTabWindow
                     }
                 }
             }
+
             if (_startupFileNames != null)
             {
                 LoadFiles(_startupFileNames, false);
@@ -75,6 +64,23 @@ namespace LogExpert.Controls.LogTabWindow
 #endif
         }
 
+        private void SetWindowPosition()
+        {
+            if (ConfigManager.Settings.isMaximized)
+            {
+                Bounds = ConfigManager.Settings.appBoundsFullscreen;
+                WindowState = FormWindowState.Maximized;
+                Bounds = ConfigManager.Settings.appBounds;
+            }
+            else
+            {
+                if (ConfigManager.Settings.appBounds.Right > 0)
+                {
+                    Bounds = ConfigManager.Settings.appBounds;
+                }
+            }
+        }
+
         private void OnLogTabWindowClosing(object sender, CancelEventArgs e)
         {
             try
@@ -85,7 +91,7 @@ namespace LogExpert.Controls.LogTabWindow
                 _ledThread.Join();
                 _statusLineThread.Join();
 
-                IList<LogWindow.LogWindow> deleteLogWindowList = new List<LogWindow.LogWindow>();
+                IList<LogWindow.LogWindow> deleteLogWindowList = [];
                 ConfigManager.Settings.alwaysOnTop = TopMost && ConfigManager.Settings.preferences.allowOnlyOneInstance;
                 SaveLastOpenFilesList();
 

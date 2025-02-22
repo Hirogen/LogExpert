@@ -247,8 +247,6 @@ namespace LogExpert.Config
 
                 SetBoundsWithinVirtualScreen(settings);
 
-                ConvertSettings(settings);
-
                 return settings;
             }
         }
@@ -299,56 +297,6 @@ namespace LogExpert.Config
             JsonSerializer serializer = new();
             serializer.Serialize(sw, settings);
         }
-
-        /// <summary>
-        /// Convert settings loaded from previous versions.
-        /// </summary>
-        /// <param name="settings"></param>
-        private void ConvertSettings(Settings settings)
-        {
-            //int oldBuildNumber = settings.versionBuild;
-
-            //// All Versions before 3583
-            //if (oldBuildNumber < 3584)
-            //{
-            //    // External tools
-            //    List<ToolEntry> newList = [];
-            //    foreach (ToolEntry tool in settings.preferences.toolEntries)
-            //    {
-            //        // set favourite to true only when name is empty, because there are always version released without this conversion fx
-            //        // remove empty tool entries (there were always 3 entries before, which can be empty if not used)
-            //        if (Util.IsNull(tool.name))
-            //        {
-            //            if (!Util.IsNull(tool.cmd))
-            //            {
-            //                tool.name = tool.cmd;
-            //                tool.isFavourite = true;
-            //                newList.Add(tool);
-            //            }
-            //        }
-            //        else
-            //        {
-            //            newList.Add(tool);
-            //        }
-            //        if (Util.IsNull(tool.iconFile))
-            //        {
-            //            tool.iconFile = tool.cmd;
-            //            tool.iconIndex = 0;
-            //        }
-            //    }
-            //    settings.preferences.toolEntries = newList;
-            //}
-
-            //if (oldBuildNumber < 3584)
-            //{
-            //    // Set the color for the FilterList entries to default (black)
-            //    foreach (FilterParams filterParam in settings.filterList)
-            //    {
-            //        filterParam.color = Color.FromKnownColor(KnownColor.Black);
-            //    }
-            //}
-        }
-
 
         /// <summary>
         /// Imports all or some of the settings/prefs stored in the input stream.

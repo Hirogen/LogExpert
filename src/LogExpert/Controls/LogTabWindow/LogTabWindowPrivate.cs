@@ -82,6 +82,7 @@ namespace LogExpert.Controls.LogTabWindow
         private void SaveLastOpenFilesList()
         {
             ConfigManager.Settings.lastOpenFilesList.Clear();
+
             foreach (DockContent content in dockPanel.Contents)
             {
                 if (content is LogWindow.LogWindow logWin)
@@ -97,6 +98,7 @@ namespace LogExpert.Controls.LogTabWindow
         private void SaveWindowPosition()
         {
             SuspendLayout();
+
             if (WindowState == FormWindowState.Normal)
             {
                 ConfigManager.Settings.appBounds = Bounds;
